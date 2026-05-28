@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>College Gallery</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background: #0a0a0a;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .image-box {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid #262626;
+      background: #111;
+    }
+
+    .image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: 0.4s;
+      transform: scale(1);
+    }
+
+    .image-box:hover img {
+      transform: scale(1.08);
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: 0.3s;
+    }
+
+    .image-box:hover .overlay {
+      background: rgba(0,0,0,0.25);
+      opacity: 1;
+    }
+
+    .btn {
+      background: white;
+      color: black;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+
+    .aspect-1-1 {
+      aspect-ratio: 1 / 1;
+    }
+
+    .aspect-16-9 {
+      aspect-ratio: 16 / 9;
+    }
+
+    .aspect-3-4 {
+      aspect-ratio: 3 / 4;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="max-w-7xl mx-auto p-6">
+
+    <div class="mb-10">
+      <h1 class="text-5xl font-bold mb-3">
+        COLLEGE GALLERY
+      </h1>
+
+      <p class="text-neutral-400">
+        Upload 4-6 photos แล้วระบบจัด layout ให้อัตโนมัติ  
+        พร้อม zoom และเลือกขนาด output ได้ เพราะมนุษย์ไม่ควรเสียชีวิตกับ grid alignment อีกต่อไป
+      </p>
+    </div>
+
+    <!-- Aspect Ratio -->
+    <div class="flex gap-3 flex-wrap mb-6">
+      <button class="ratio-btn btn" data-ratio="aspect-1-1">
+        1:1 Square
+      </button>
+
+      <button class="ratio-btn btn" data-ratio="aspect-16-9">
+        16:9 Landscape
+      </button>
+
+      <button class="ratio-btn btn" data-ratio="aspect-3-4">
+        3:4 Portrait
+      </button>
+    </div>
+
+    <!-- Upload -->
+    <label class="border-2 border-dashed border-neutral-700 rounded-3xl p-12 flex items-center justify-center cursor-pointer bg-neutral-900 hover:border-white transition">
+      <div class="text-center">
+        <div class="text-2xl font-semibold mb-2">
+          Upload Photos
+        </div>
+
+        <p class="text-neutral-400 text-sm">
+          เลือกรูป 4-6 รูป
+        </p>
+      </div>
+
+      <input type="file" id="upload" multiple accept="image/*" hidden />
+    </label>
+
+    <!-- Gallery -->
+    <div id="gallery"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
+    </div>
+
+  </div>
+
+  <script>
+
+    const upload = document.getElementById('upload');
+    const gallery = document.getElementById('gallery');
+
+    let currentRatio = 'aspect-1-1';
+
+    // Change Ratio
+    document.querySelectorAll('.ratio-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentRatio = btn.dataset.ratio;
+
+        document.querySelectorAll('.photo-frame').forEach(frame => {
+          frame.classList.remove(
+            'aspect-1-1',
+            'aspect-16-9',
+            'aspect-3-4'
+          );
+
+          frame.classList.add(currentRatio);
+        });
+      });
+    });
+
+    // Upload Images
+    upload.addEventListener('change', (e) => {
+
+      gallery.innerHTML = '';
+
+      const files = Array.from(e.target.files).slice(0, 6);
+
+      files.forEach(file => {
+
+        const url = URL.createObjectURL(file);
+
+        const card = document.createElement('div');
+        card.className =
+          'image-box shadow-2xl';
+
+        const frame = document.createElement('div');
+        frame.className =
+          `photo-frame ${currentRatio}`;
+
+        const img = document.createElement('img');
+        img.src = url;
+
+        let scale = 1;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'overlay';
+
+        const zoomIn = document.createElement('button');
+        zoomIn.className = 'btn';
+        zoomIn.innerText = 'Zoom In';
+
+        zoomIn.onclick = () => {
+          scale += 0.1;
+          img.style.transform = `scale(${scale})`;
+        };
+
+        const zoomOut = document.createElement('button');
+        zoomOut.className = 'btn';
+        zoomOut.innerText = 'Zoom Out';
+
+        zoomOut.onclick = () => {
+          scale = Math.max(1, scale - 0.1);
+          img.style.transform = `scale(${scale})`;
+        };
+
+        overlay.appendChild(zoomIn);
+        overlay.appendChild(zoomOut);
+
+        frame.appendChild(img);
+        frame.appendChild(overlay);
+
+        card.appendChild(frame);
+
+        gallery.appendChild(card);
+
+      });
+
+    });
+
+  </script>
+
+</body>
+</html>
